@@ -210,50 +210,52 @@
         });
 
         document.getElementById('lead-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            submitButton.disabled = true;
-            submitButton.innerText = 'Submitting...';
+        event.preventDefault();
+        submitButton.disabled = true;
+        submitButton.innerText = 'Submitting...';
 
-            const phoneNumber = document.getElementById('phoneNumber').value;
+        const phoneNumber = document.getElementById('phoneNumber').value;
 
-            // API call to check if the member is in the system
-            const checkMemberUrl = `https://api.momence.com/host/13752/customers?phone=${phoneNumber}`;
-            try {
-                const response = await fetch(checkMemberUrl, {
-                    headers: { 'Cookie': sessionCookie }
-                });
+        // API call to check if the member is in the system
+        const checkMemberUrl = `https://api.momence.com/host/13752/customers?phone=${phoneNumber}`;
+        try {
+            const response = await fetch(checkMemberUrl, {
+                headers: { 'Cookie': sessionCookie }
+            });
 
-                if (response.status === 403) {
-                    console.error('Error 403: Forbidden - Check API permissions and authentication.');
-                    alert('Access forbidden: Please check your API permissions.');
-                    submitButton.disabled = false;
-                    submitButton.innerText = 'Submit';
-                    return;
-                }
+            if (response.status === 403) {
+                console.error('Error 403: Forbidden - Check API permissions and authentication.');
+                alert('Access forbidden: Please check your API permissions.');
+                submitButton.disabled = false;
+                submitButton.innerText = 'Submit';
+                return;
+            }
 
-                if (response.status === 404) {
-                    console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
-                    alert('Resource not found: Please check the endpoint URL.');
-                    submitButton.disabled = false;
-                    submitButton.innerText = 'Submit';
-                    return;
-                }
+            if (response.status === 404) {
+                console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
+                alert('Resource not found: Please check the endpoint URL.');
+                submitButton.disabled = false;
+                submitButton.innerText = 'Submit';
+                return;
+            }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (data.length > 0) {
-                    // Member found
-                    try {
-                        const subscriptionUrl = `https://api.momence.com/host/13752/customers/${data[0].id}/memberships`;
-                        const packUrl = `https://api.momence.com/host/13752/package-events/${data[0].id}/memberships`;
+            if (data.length > 0) {
+                // Member found
+                try {
+                    const subscriptionUrl = `https://api.momence.com/host/13752/customers/${data[0].id}/memberships`;
+                    const packUrl = `https://api.momence.com/host/13752/package-events/${data[0].id}/memberships`;
 
-                        const [subscriptionsResponse, packsResponse] = await Promise.all([
-                            fetch(subscriptionUrl, { headers: { 'Cookie': sessionCookie } }),
-                            fetch(packUrl, { headers: { 'Cookie': sessionCookie }}),
+                    const [subscriptionsResponse, packsResponse] = await Promise.all([
+                        fetch(subscriptionUrl, { headers: { 'Cookie': sessionCookie } }),
+                        fetch(packUrl, { headers: { 'Cookie': sessionCookie }})
+                    ]);
+
                     if (subscriptionsResponse.status === 403 || packsResponse.status === 403) {
                         console.error('Error 403: Forbidden - Check API permissions and authentication.');
                         alert('Access forbidden: Please check your API permissions.');
