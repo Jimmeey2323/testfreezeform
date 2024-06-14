@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Trial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1c90ff;
+            --hover-color: #003870;
+            --text-color: #333;
+            --input-background: #fff;
+            --input-border: #ccc;
+        }
+        body {
+            font-family: 'Play', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .form-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: transparent; /* Transparent background */
+            z-index: 1000;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            width: 300px;
+        }
+        .logo-container img {
+            max-width: 60px;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            margin-bottom: 10px;
+            margin-top: 0px;
+            align-items: right;
+        }
+        #lead-form {
+            padding: 10px;
+        }
+        #lead-form label, #lead-form p {
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 12px;
+            font-family: 'Play', sans-serif;
+        }
+        #lead-form input[type="text"], #lead-form input[type="email"], #lead-form input[type="tel"], #lead-form select {
+            width: calc(100% - 10px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: 'Play', sans-serif;
+            font-size: 12px;
+        }
+        #button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            margin-bottom: 5px;
+            width: calc(100% - 10px);
+        }
+
+        button {
+            width: 48%;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Play', sans-serif;
+        }
+        button.submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 12px;
+            font-family: 'Play', sans-serif;
+        }
+        button.submit:hover {
+            background-color: var(--hover-color);
+        }
+        button.close {
+            background-color: #888;
+            color: white;
+            border: none;
+            font-size: 12px;
+            font-family: 'Play', sans-serif;
+        }
+        button.close:hover {
+            background-color: #666;
+        }
+        small {
+            display: block;
+            font-size: 8px;
+            color: #666;
+            margin-top: -5px;
+            margin-bottom: 5px;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-overlay" id="form-overlay">
+        <div class="form-container">
+            <form id="lead-form">
+                <div class="logo-container">
+                    <img src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
+                </div>
+                <label for="firstName">First Name <span class="required">*</span></label>
+                <input type="text" id="firstName" name="firstName" required>
+
+                <label for="lastName">Last Name <span class="required">*</span></label>
+                <input type="text" id="lastName" name="lastName" required>
+
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="phoneNumber">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="+91XXXXXXXXXX" oninput="formatPhoneNumber()">
+
+                <label for="time">What is your preferred time to connect?<span class="required">*</span></label>
+                <select id="time" name="time" required>
+                    <option value="" disabled selected>Preferred Time</option>
+                    <option value="Any">Any</option>
+                    <option value="Morning">Morning</option>
+                    <option value="Noon">Noon</option>
+                    <option value="Evening">Evening</option>
+                </select>
+
+                <label for="center">Select a Studio Location<span class="required">*</span></label>
+                <select id="center" name="center" required>
+                    <option value="" disabled selected>Select Preferred Studio Location</option>
+                    <option value="Supreme Headquarters, Bandra">Supreme Headquarters, Bandra</option>
+                    <option value="Kwality House, Kemps Corner">Kwality House, Kemps Corner</option>
+                    <option value="Kenkere House, Bengaluru">Kenkere House, Bengaluru</option>
+                </select>
+
+                <div id="button-container">
+                    <button id="close-button" class="close">Close</button>
+                    <button type="submit" class="submit">Submit</button>
+                </div>
+            </form>
+
+            <div id="membership-container" class="hidden">
+                <p>Active Memberships:</p>
+                <form id="membership-form">
+                    <div id="membership-checkboxes"></div>
+                    <button type="submit" class="submit">Final Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formOverlay = document.getElementById('form-overlay');
+        const closeButton = document.getElementById('close-button');
+        const submitButton = document.querySelector('button[type=submit]');
+        const membershipContainer = document.getElementById('membership-container');
+        const membershipForm = document.getElementById('membership-form');
+        const membershipCheckboxes = document.getElementById('membership-checkboxes');
+
+        closeButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            formOverlay.style.display = 'none';
+        });
+
+        document.getElementById('lead-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            submitButton.disabled = true;
+            submitButton.innerText = 'Submitting...';
+
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            // API call to check if the member is in the database
+            fetch(`https://api.momence.com/host/13752/search?query=${phoneNumber}&summary=false`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Member found, show UI prompt and memberships
+                        alert('Member found in the database.');
+
+                        // Fetch and display active memberships
+                        const memberId = data[0].id; // Assuming the first result is the member we want
+                        Promise.all([
+                            fetch(`https://readonly-api.momence.com/host/13752/customers/${memberId}/subscriptions?type=active`),
+                            fetch(`https://readonly-api.momence.com/host/13752/customers/${memberId}/packs?type=active`)
+                        ])
+                        .then(responses => Promise.all(responses.map(res => res.json())))
+                        .then(memberships => {
+                            const [subscriptions, packs] = memberships;
+
+                            // Clear previous checkboxes
+                            membershipCheckboxes.innerHTML = '';
+
+                            // Add new checkboxes for subscriptions
+                            subscriptions.forEach(subscription => {
+                                const checkbox = document.createElement('input');
+                                checkbox.type = 'checkbox';
+                                checkbox.name = 'membership';
+                                checkbox.value = subscription.name; // Assuming 'name' is a property of subscription
+                                const label = document.createElement('label');
+                                label.textContent = subscription.name;
+                                membershipCheckboxes.appendChild(checkbox);
+                                membershipCheckboxes.appendChild(label);
+                                membershipCheckboxes.appendChild(document.createElement('br'));
+                            });
+
+                            // Add new checkboxes for packs
+                            packs.forEach(pack => {
+                                const checkbox = document.createElement('input');
+                                checkbox.type = 'checkbox';
+                                checkbox.name = 'membership';
+                                checkbox.value = pack.name; // Assuming 'name' is a property of pack
+                                const label = document.createElement('label');
+                                label.textContent = pack.name;
+                                membershipCheckboxes.appendChild(checkbox);
+                                membershipCheckboxes.appendChild(label);
+                                membershipCheckboxes.appendChild(document.createElement('br'));
+                            });
+
+                            // Show membership selection form
+                            membershipContainer.classList.remove('hidden');
+                        })
+                        .catch(error => {
+                            console.error('Error fetching memberships:', error);
+                        });
+
+                    } else {
+                        // Member not found, submit the lead form
+                        submitLeadForm();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking member:', error);
+                });
+        });
+
+        function submitLeadForm() {
+            const formData = new FormData(document.getElementById('lead-form'));
+
+            fetch('https://api.momence.com/host/13752/customers', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Lead submitted successfully.');
+                submitButton.disabled = false;
+                submitButton.innerText = 'Submit';
+                formOverlay.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error submitting lead:', error);
+                submitButton.disabled = false;
+                submitButton.innerText = 'Submit';
+            });
+        }
+
+        membershipForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const selectedMemberships = Array.from(document.querySelectorAll('input[name="membership"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            // Handle the selected memberships as needed
+            alert('Selected memberships: ' + selectedMemberships.join(', '));
+            
+            // You can add the necessary API calls or logic here to handle the selected memberships
+
+            formOverlay.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
