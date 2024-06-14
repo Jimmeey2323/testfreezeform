@@ -167,6 +167,47 @@
     </div>
 
     <script>
+        const loginUrl = 'https://api.momence.com/auth/login';
+        const email = 'jimmeey@physique57india.com';
+        const password = 'Jimmeey@123';
+        let sessionCookie = '';
+
+        async function authenticate(loginUrl, email, password) {
+            const loginHeaders = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+
+            const loginPayload = {
+                email: email,
+                password: password,
+            };
+
+            try {
+                const response = await fetch(loginUrl, {
+                    method: 'POST',
+                    headers: loginHeaders,
+                    body: JSON.stringify(loginPayload),
+                });
+
+                if (response.ok) {
+                    const cookie = response.headers.get('Set-Cookie');
+                    sessionCookie = cookie ? cookie.split(';')[0] : null; // Extract the session cookie
+                    return sessionCookie;
+                } else {
+                    console.error('Authentication failed:', response.statusText);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error during authentication:', error);
+                return null;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await authenticate(loginUrl, email, password);
+        });
+
         const formOverlay = document.getElementById('form-overlay');
         const closeButton = document.getElementById('close-button');
         const submitButton = document.querySelector('button[type=submit]');
@@ -179,7 +220,7 @@
             formOverlay.style.display = 'none';
         });
 
-        document.getElementById('lead-form').addEventListener('submit', function(event) {
+        document.getElementById('lead-form').addEventListener('submit', async function(event) {
             event.preventDefault();
             submitButton.disabled = true;
             submitButton.innerText = 'Submitting...';
@@ -187,67 +228,60 @@
             const phoneNumber = document.getElementById('phoneNumber').value;
 
             // API call to check if the member is in the database
-            fetch(`https://api.momence.com/host/13752/search?query=${phoneNumber}&summary=false`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        // Member found, show UI prompt and memberships
-                        alert('Member found in the database.');
+            const searchUrl = `https://api.momence.com/host/13752/search?query=${phoneNumber}&summary=false`;
+            try {
+                const searchResponse = await fetch(searchUrl, {
+                    headers: {
+                        'Cookie': sessionCookie,
+                    }
+                });
+                const searchData = await searchResponse.json();
 
-                        // Fetch and display active memberships
-                        const memberId = data[0].id; // Assuming the first result is the member we want
-                        Promise.all([
-                            fetch(`https://readonly-api.momence.com/host/13752/customers/${memberId}/subscriptions?type=active`),
-                            fetch(`https://readonly-api.momence.com/host/13752/customers/${memberId}/packs?type=active`)
-                        ])
-                        .then(responses => Promise.all(responses.map(res => res.json())))
-                        .then(memberships => {
-                            const [subscriptions, packs] = memberships;
+                if (searchData.length > 0) {
+                    // Member found, show UI prompt and memberships
+                    alert('Member found in the database.');
 
-                            // Clear previous checkboxes
-                            membershipCheckboxes.innerHTML = '';
+                    // Fetch and display active memberships
+                    const memberId = searchData[0].id; // Assuming the first result is the member we want
+                    const subscriptionUrl = `https://readonly-api.momence.com/host/13752/customers/${memberId}/subscriptions?type=active`;
+                    const packUrl = `https://readonly-api.momence.com/host/13752/customers/${memberId}/packs?type=active`;
 
-                            // Add new checkboxes for subscriptions
-                            subscriptions.forEach(subscription => {
-                                const checkbox = document.createElement('input');
-                                checkbox.type = 'checkbox';
-                                checkbox.name = 'membership';
-                                checkbox.value = subscription.name; // Assuming 'name' is a property of subscription
-                                const label = document.createElement('label');
-                                label.textContent = subscription.name;
-                                membershipCheckboxes.appendChild(checkbox);
-                                membershipCheckboxes.appendChild(label);
-                                membershipCheckboxes.appendChild(document.createElement('br'));
-                            });
+                    try {
+                        const [subscriptionsResponse, packsResponse] = await Promise.all([
+                            fetch(subscriptionUrl, { headers: { 'Cookie': sessionCookie } }),
+                            fetch(packUrl, { headers: { 'Cookie': sessionCookie } })
+                        ]);
 
-                            // Add new checkboxes for packs
-                            packs.forEach(pack => {
-                                const checkbox = document.createElement('input');
-                                checkbox.type = 'checkbox';
-                                checkbox.name = 'membership';
-                                checkbox.value = pack.name; // Assuming 'name' is a property of pack
-                                const label = document.createElement('label');
-                                label.textContent = pack.name;
-                                membershipCheckboxes.appendChild(checkbox);
-                                membershipCheckboxes.appendChild(label);
-                                membershipCheckboxes.appendChild(document.createElement('br'));
-                            });
+                        const subscriptions = await subscriptionsResponse.json();
+                        const packs = await packsResponse.json();
 
-                            // Show membership selection form
-                            membershipContainer.classList.remove('hidden');
-                        })
-                        .catch(error => {
-                            console.error('Error fetching memberships:', error);
+                        // Clear existing checkboxes
+                        membershipCheckboxes.innerHTML = '';
+
+                        // Populate checkboxes with active subscriptions and packs
+                        [...subscriptions, ...packs].forEach(membership => {
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = 'membership';
+                            checkbox.value = membership.id;
+                            membershipCheckboxes.appendChild(checkbox);
+                            membershipCheckboxes.appendChild(document.createTextNode(membership.name));
+                            membershipCheckboxes.appendChild(document.createElement('br'));
                         });
 
-                    } else {
-                        // Member not found, submit the lead form
-                        submitLeadForm();
+                        // Show membership selection form
+                        membershipContainer.classList.remove('hidden');
+                    } catch (error) {
+                        console.error('Error fetching memberships:', error);
                     }
-                })
-                .catch(error => {
-                    console.error('Error checking member:', error);
-                });
+
+                } else {
+                    // Member not found, submit the lead form
+                    submitLeadForm();
+                }
+            } catch (error) {
+                console.error('Error checking member:', error);
+            }
         });
 
         function submitLeadForm() {
@@ -257,7 +291,8 @@
                 method: 'POST',
                 body: JSON.stringify(Object.fromEntries(formData)),
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Cookie': sessionCookie
                 }
             })
             .then(response => response.json())
@@ -286,6 +321,12 @@
 
             formOverlay.style.display = 'none';
         });
+
+        function formatPhoneNumber() {
+            let phoneNumber = document.getElementById('phoneNumber').value;
+            phoneNumber = phoneNumber.replace(/\D/g, ''); // Remove non-numeric characters
+            document.getElementById('phoneNumber').value = '+91' + phoneNumber;
+        }
     </script>
 </body>
 </html>
