@@ -128,16 +128,7 @@
                 <input type="email" id="email" name="email" required>
 
                 <label for="phoneNumber">Phone Number <span class="required">*</span></label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="+91XXXXXXXXXX">
-
-                <label for="time">What is your preferred time to connect?<span class="required">*</span></label>
-                <select id="time" name="time" required>
-                    <option value="" disabled selected>Preferred Time</option>
-                    <option value="Any">Any</option>
-                    <option value="Morning">Morning</option>
-                    <option value="Noon">Noon</option>
-                    <option value="Evening">Evening</option>
-                </select>
+                <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="Enter your phone number">
 
                 <label for="center">Select a Studio Location<span class="required">*</span></label>
                 <select id="center" name="center" required>
@@ -262,116 +253,113 @@
 
                         const [subscriptionsResponse, packsResponse] = await Promise.all([
                             fetch(subscriptionUrl, { headers: { 'Cookie': sessionCookie } }),
-                            fetch(packUrl, { headers: { 'Cookie': sessionCookie } })
-                        ]);
-
-                        if (subscriptionsResponse.status === 403 || packsResponse.status === 403) {
-                            console.error('Error 403: Forbidden - Check API permissions and authentication.');
-                            alert('Access forbidden: Please check your API permissions.');
-                            submitButton.disabled = false;
-                            submitButton.innerText = 'Submit';
-                            return;
-                        }
-
-                        if (subscriptionsResponse.status === 404 || packsResponse.status === 404) {
-                            console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
-                            alert('Resource not found: Please check the endpoint URL.');
-                            submitButton.disabled = false;
-                            submitButton.innerText = 'Submit';
-                            return;
-                        }
-
-                        const subscriptions = await subscriptionsResponse.json();
-                        const packs = await packsResponse.json();
-
-                        // Clear existing checkboxes
-                        membershipCheckboxes.innerHTML = '';
-
-                        // Populate checkboxes with active subscriptions and packs
-                        [...subscriptions, ...packs].forEach(membership => {
-                            const checkbox = document.createElement('input');
-                            checkbox.type = 'checkbox';
-                            checkbox.name = 'membership';
-                            checkbox.value = membership.id;
-                            membershipCheckboxes.appendChild(checkbox);
-                            membershipCheckboxes.appendChild(document.createTextNode(membership.name));
-                            membershipCheckboxes.appendChild(document.createElement('br'));
-                        });
-
-                        // Show membership selection form
-                        membershipContainer.classList.remove('hidden');
-                    } catch (error) {
-                        console.error('Error fetching memberships:', error);
+                            fetch(packUrl, { headers: { 'Cookie': sessionCookie }}),
+                    if (subscriptionsResponse.status === 403 || packsResponse.status === 403) {
+                        console.error('Error 403: Forbidden - Check API permissions and authentication.');
+                        alert('Access forbidden: Please check your API permissions.');
+                        submitButton.disabled = false;
+                        submitButton.innerText = 'Submit';
+                        return;
                     }
 
-                } else {
-                    // Member not found, submit the lead form
-                    submitLeadForm();
+                    if (subscriptionsResponse.status === 404 || packsResponse.status === 404) {
+                        console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
+                        alert('Resource not found: Please check the endpoint URL.');
+                        submitButton.disabled = false;
+                        submitButton.innerText = 'Submit';
+                        return;
+                    }
+
+                    const subscriptions = await subscriptionsResponse.json();
+                    const packs = await packsResponse.json();
+
+                    // Clear existing checkboxes
+                    membershipCheckboxes.innerHTML = '';
+
+                    // Populate checkboxes with active subscriptions and packs
+                    [...subscriptions, ...packs].forEach(membership => {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'membership';
+                        checkbox.value = membership.id;
+                        membershipCheckboxes.appendChild(checkbox);
+                        membershipCheckboxes.appendChild(document.createTextNode(membership.name));
+                        membershipCheckboxes.appendChild(document.createElement('br'));
+                    });
+
+                    // Show membership selection form
+                    membershipContainer.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error fetching memberships:', error);
                 }
-            } catch (error) {
-                console.error('Error checking member:', error);
+
+            } else {
+                // Member not found, submit the lead form
+                submitLeadForm();
             }
-        });
-
-        function submitLeadForm() {
-            const formData = new FormData(document.getElementById('lead-form'));
-
-            fetch('https://api.momence.com/host/13752/customers', {
-                method: 'POST',
-                body: JSON.stringify(Object.fromEntries(formData)),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Cookie': sessionCookie
-                }
-            })
-            .then(response => {
-                if (response.status === 403) {
-                    console.error('Error 403: Forbidden - Check API permissions and authentication.');
-                    alert('Access forbidden: Please check your API permissions.');
-                    submitButton.disabled = false;
-                    submitButton.innerText = 'Submit';
-                    return;
-                }
-
-                if (response.status === 404) {
-                    console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
-                    alert('Resource not found: Please check the endpoint URL.');
-                    submitButton.disabled = false;
-                    submitButton.innerText = 'Submit';
-                    return;
-                }
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                return response.json();
-            })
-            .then(data => {
-                alert('Lead submitted successfully.');
-                submitButton.disabled = false;
-                submitButton.innerText = 'Submit';
-                formOverlay.style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error submitting lead:', error);
-                submitButton.disabled = false;
-                submitButton.innerText = 'Submit';
-            });
+        } catch (error) {
+            console.error('Error checking member:', error);
         }
+    });
 
-        membershipForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const selectedMemberships = Array.from(document.querySelectorAll('input[name="membership"]:checked'))
-                .map(checkbox => checkbox.value);
+    function submitLeadForm() {
+        const formData = new FormData(document.getElementById('lead-form'));
 
-            // Handle the selected memberships as needed
-            alert('Selected memberships: ' + selectedMemberships.join(', '));
-            
-            // You can add the necessary API calls or logic here to handle the selected memberships
+        fetch('https://api.momence.com/host/13752/customers', {
+            method: 'POST',
+            body: JSON.stringify(Object.fromEntries(formData)),
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': sessionCookie
+            }
+        })
+        .then(response => {
+            if (response.status === 403) {
+                console.error('Error 403: Forbidden - Check API permissions and authentication.');
+                alert('Access forbidden: Please check your API permissions.');
+                submitButton.disabled = false;
+                submitButton.innerText = 'Submit';
+                return;
+            }
 
+            if (response.status === 404) {
+                console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
+                alert('Resource not found: Please check the endpoint URL.');
+                submitButton.disabled = false;
+                submitButton.innerText = 'Submit';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            alert('Lead submitted successfully.');
+            submitButton.disabled = false;
+            submitButton.innerText = 'Submit';
             formOverlay.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error submitting lead:', error);
+            submitButton.disabled = false;
+            submitButton.innerText = 'Submit';
         });
-    </script>
-</body>
-</html>
+    }
+
+    membershipForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const selectedMemberships = Array.from(document.querySelectorAll('input[name="membership"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        // Handle the selected memberships as needed
+        alert('Selected memberships: ' + selectedMemberships.join(', '));
+
+        // You can add the necessary API calls or logic here to handle the selected memberships
+
+        formOverlay.style.display = 'none';
+    });
+</script>
+
