@@ -4,9 +4,27 @@
   <title>API Form</title>
   <style>
     /* Add your custom styles here */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+    }
     .logo {
       display: block;
-      margin: 20px auto;
+      margin: 0 auto 20px;
       max-width: 200px;
     }
     .spinner {
@@ -23,40 +41,74 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 <body>
-  <img class="logo" src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
+  <div class="container">
+    <img class="logo" src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
 
-  <form id="apiForm">
-    <label for="firstName">First Name:</label>
-    <input type="text" id="firstName" name="firstName" required><br>
+    <form id="apiForm">
+      <div class="form-group">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required>
+      </div>
 
-    <label for="lastName">Last Name:</label>
-    <input type="text" id="lastName" name="lastName" required><br>
+      <div class="form-group">
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required>
+      </div>
 
-    <label for="phone">Phone Number:</label>
-    <select id="countryCode" name="countryCode">
-      <option value="US">United States (+1)</option>
-      <option value="IN">India (+91)</option>
-      <!-- Add more country options as needed -->
-    </select>
-    <input type="text" id="phone" name="phone" required><br>
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <select id="countryCode" name="countryCode">
+          <option value="US">United States (+1)</option>
+          <option value="IN">India (+91)</option>
+          <!-- Add more country options as needed -->
+        </select>
+        <input type="text" id="phone" name="phone" required>
+      </div>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required><br>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
 
-    <button type="button" onclick="go()">Go</button>
-  </form>
+      <button type="button" onclick="go()">Go</button>
+    </form>
 
-  <div id="spinner" class="spinner"></div>
+    <div id="spinner" class="spinner"></div>
+  </div>
 
   <script>
     const loginUrl = 'https://api.momence.com/auth/login';
     const email = 'jimmeey@physique57india.com';
     const password = 'Jimmeey@123';
 
-    function authenticate(loginUrl, email, password) {
+    function authenticate() {
       const loginHeaders = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -73,6 +125,9 @@
         body: JSON.stringify(loginPayload),
       })
         .then(response => {
+          if (!response.ok) {
+            throw new Error('Authentication failed: ' + response.statusText);
+          }
           const cookie = response.headers.get('Set-Cookie');
           return cookie ? cookie.split(';')[0] : null; // Extract the session cookie
         })
@@ -94,23 +149,22 @@
       const spinner = document.getElementById('spinner');
       spinner.style.display = 'block';
 
-      authenticate(loginUrl, email, password)
+      authenticate()
         .then(cookie => {
           if (cookie) {
             const apiUrl = `https://api.momence.com/host/13752/search?query=${phone}&summary=true`;
 
             // Make the first API call
-            fetch(apiUrl, {
+            return fetch(apiUrl, {
               headers: {
                 'Cookie': cookie,
               },
             })
               .then(response => {
-                if (response.ok) {
-                  return response.json();
-                } else {
-                  throw new Error('Error during API call: ' + response.status);
+                if (!response.ok) {
+                  throw new Error('Error during API call: ' + response.statusText);
                 }
+                return response.json();
               })
               .then(data => {
                 const id = data.id;
@@ -119,11 +173,16 @@
                 const subscriptionsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/subscriptions?type=active`;
                 const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/packs?type=active`;
 
-                Promise.all([
-                  fetch(subscriptionsUrl),
-                  fetch(packsUrl)
+                return Promise.all([
+                  fetch(subscriptionsUrl, { headers: { 'Cookie': cookie } }),
+                  fetch(packsUrl, { headers: { 'Cookie': cookie } })
                 ])
-                  .then(responses => Promise.all(responses.map(response => response.json())))
+                  .then(responses => Promise.all(responses.map(response => {
+                    if (!response.ok) {
+                      throw new Error('Error during API call: ' + response.statusText);
+                    }
+                    return response.json();
+                  })))
                   .then(results => {
                     const subscriptions = results[0];
                     const packs = results[1];
@@ -132,7 +191,6 @@
                     spinner.style.display = 'none';
 
                     // Display the memberships/packs as tickbox options
-                    // You can modify this part to suit your needs
                     const membershipsDiv = document.createElement('div');
                     membershipsDiv.innerHTML = '<h3>Memberships/Packs:</h3>';
                     form.appendChild(membershipsDiv);
@@ -166,7 +224,6 @@
                     });
 
                     // Add date picker fields and submit button
-                    // You can use a library like jQuery UI for date pickers
                     const startDateLabel = document.createElement('label');
                     startDateLabel.textContent = 'Start Date:';
                     const startDateInput = document.createElement('input');
@@ -192,45 +249,51 @@
 
                         // Make the third API call
                         fetch(freezeUrl, {
+                          method: 'POST',
                           headers: {
                             'Cookie': cookie,
+                            'Content-Type': 'application/json'
                           },
+                          body: JSON.stringify({
+                            start_date: startDateInput.value,
+                            end_date: endDateInput.value
+                          })
                         })
                           .then(response => {
-                            if (response.ok) {
-                              return response.json();
-                            } else {
-                              throw new Error('Error during freeze API call: ' + response.status);
+                            if (!response.ok) {
+                              throw new Error('Error during freeze API call: ' + response.statusText);
                             }
+                            return response.json();
                           })
                           .then(data => {
-                            // Handle the response
-                            console.log(data);
+                            console.log('Freeze response:', data);
                           })
                           .catch(error => {
-                            // Handle errors
                             console.error('Error during freeze API call:', error);
                           });
 
                         // Make the fourth API call
                         fetch(unfreezeUrl, {
+                          method: 'POST',
                           headers: {
                             'Cookie': cookie,
+                            'Content-Type': 'application/json'
                           },
+                          body: JSON.stringify({
+                            start_date: startDateInput.value,
+                            end_date: endDateInput.value
+                          })
                         })
                           .then(response => {
-                            if (response.ok) {
-                              return response.json();
-                            } else {
-                              throw new Error('Error during unfreeze API call: ' + response.status);
+                            if (!response.ok) {
+                              throw new Error('Error during unfreeze API call: ' + response.statusText);
                             }
+                            return response.json();
                           })
                           .then(data => {
-                            // Handle the response
-                            console.log(data);
+                            console.log('Unfreeze response:', data);
                           })
                           .catch(error => {
-                            // Handle errors
                             console.error('Error during unfreeze API call:', error);
                           });
                       });
@@ -243,28 +306,18 @@
                     form.appendChild(endDateInput);
                     form.appendChild(document.createElement('br'));
                     form.appendChild(submitButton);
-                  })
-                  .catch(error => {
-                    // Hide spinner
-                    spinner.style.display = 'none';
-
-                    // Handle errors
-                    console.error('Error during API calls:', error);
                   });
-              })
-              .catch(error => {
-                // Hide spinner
-                spinner.style.display = 'none';
-
-                // Handle errors
-                console.error('Error during API call:', error);
               });
           } else {
-            // Hide spinner
-            spinner.style.display = 'none';
-
-            console.error('Authentication failed. Unable to retrieve session cookie.');
+            throw new Error('Authentication failed. Unable to retrieve session cookie.');
           }
+        })
+        .catch(error => {
+          // Hide spinner
+          spinner.style.display = 'none';
+
+          // Handle errors
+          console.error('Error:', error);
         });
     }
   </script>
