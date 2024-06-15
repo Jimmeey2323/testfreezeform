@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.5/css/flag-icons.min.css" />
     <style>
         body {
-            font-family: 'Play', sans-serif;
+            font-family: 'Arial', sans-serif;
             background: #f0f2f5;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 200vh;
+            height: 100vh;
             margin: 0;
         }
         .container {
@@ -128,39 +128,43 @@
                     });
 
                     const searchData = await searchResponse.json();
-                    const customerId = searchData.results[0].id;
+                    if (searchData.results.length > 0) {
+                        const customerId = searchData.results[0].id;
 
-                    const subscriptionsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/subscriptions?type=active`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Cookie': cookie,
-                        },
-                    });
+                        const subscriptionsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/subscriptions?type=active`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Cookie': cookie,
+                            },
+                        });
 
-                    const packsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Cookie': cookie,
-                        },
-                    });
+                        const packsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Cookie': cookie,
+                            },
+                        });
 
-                    const subscriptions = await subscriptionsResponse.json();
-                    const packs = await packsResponse.json();
+                        const subscriptions = await subscriptionsResponse.json();
+                        const packs = await packsResponse.json();
 
-                    const memberships = [...subscriptions, ...packs];
+                        const memberships = [...subscriptions, ...packs];
 
-                    const membershipsDiv = document.getElementById('memberships');
-                    membershipsDiv.innerHTML = '';
-                    memberships.forEach(m => {
-                        const label = document.createElement('label');
-                        label.innerHTML = `<input type="radio" name="membership" value="${m.id}"> ${m.name}`;
-                        membershipsDiv.appendChild(label);
-                    });
+                        const membershipsDiv = document.getElementById('memberships');
+                        membershipsDiv.innerHTML = '';
+                        memberships.forEach(m => {
+                            const label = document.createElement('label');
+                            label.innerHTML = `<input type="radio" name="membership" value="${m.id}"> ${m.name}`;
+                            membershipsDiv.appendChild(label);
+                        });
 
-                    document.getElementById('membershipOptions').style.display = 'block';
-                    document.getElementById('datePickers').style.display = 'block';
+                        document.getElementById('membershipOptions').style.display = 'block';
+                        document.getElementById('datePickers').style.display = 'block';
+                    } else {
+                        alert('No customer found with the provided phone number.');
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
