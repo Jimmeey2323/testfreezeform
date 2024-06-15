@@ -128,7 +128,7 @@
                     });
 
                     const searchData = await searchResponse.json();
-                    if (searchData.results.length > 0) {
+                    if (searchData.results && searchData.results.length > 0) {
                         const customerId = searchData.results[0].id;
 
                         const subscriptionsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/subscriptions?type=active`, {
@@ -168,6 +168,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
+                alert('An error occurred. Please try again.');
             } finally {
                 document.getElementById('spinner').style.display = 'none';
             }
@@ -184,7 +185,7 @@
                 const cookie = await authenticate();
 
                 if (cookie) {
-                    await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-freeze`, {
+                    const freezeResponse = await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-freeze`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -193,19 +194,28 @@
                         body: JSON.stringify({ startDate, endDate }),
                     });
 
-                    await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-unfreeze`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Cookie': cookie,
-                        },
-                        body: JSON.stringify({ startDate, endDate }),
-                    });
+                    if (freezeResponse.ok) {
+                        const unfreezeResponse = await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-unfreeze`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Cookie': cookie,
+                            },
+                            body: JSON.stringify({ startDate, endDate }),
+                        });
 
-                    alert('Membership freeze and unfreeze scheduled successfully');
+                        if (unfreezeResponse.ok) {
+                            alert('Membership freeze and unfreeze scheduled successfully');
+                        } else {
+                            alert('Failed to schedule unfreeze.');
+                        }
+                    } else {
+                        alert('Failed to schedule freeze.');
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
+                alert('An error occurred. Please try again.');
             } finally {
                 document.getElementById('spinner').style.display = 'none';
             }
@@ -222,8 +232,12 @@
                     body: JSON.stringify({ email: 'jimmeey@physique57india.com', password: 'Jimmeey@123' }),
                 });
 
-                const cookie = response.headers.get('set-cookie');
-                return cookie ? cookie.split(';')[0] : null;
+                if (response.ok) {
+                    const cookie = response.headers.get('set-cookie');
+                    return cookie ? cookie.split(';')[0] : null;
+                } else {
+                    throw new Error('Authentication failed');
+                }
             } catch (error) {
                 console.error('Error during authentication:', error);
                 return null;
