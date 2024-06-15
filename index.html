@@ -211,6 +211,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 }
+                    mode: 'cors' // Add this line
             })
             .then(response => response.json())
             .then(data => {
