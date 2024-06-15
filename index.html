@@ -4,9 +4,27 @@
   <title>API Form</title>
   <style>
     /* Add your custom styles here */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+    }
     .logo {
       display: block;
-      margin: 20px auto;
+      margin: 0 auto 20px;
       max-width: 200px;
     }
     .spinner {
@@ -23,33 +41,67 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 <body>
-  <img class="logo" src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
+  <div class="container">
+    <img class="logo" src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
 
-  <form id="apiForm">
-    <label for="firstName">First Name:</label>
-    <input type="text" id="firstName" name="firstName" required><br>
+    <form id="apiForm">
+      <div class="form-group">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required>
+      </div>
 
-    <label for="lastName">Last Name:</label>
-    <input type="text" id="lastName" name="lastName" required><br>
+      <div class="form-group">
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required>
+      </div>
 
-    <label for="phone">Phone Number:</label>
-    <select id="countryCode" name="countryCode">
-      <option value="US">United States (+1)</option>
-      <option value="IN">India (+91)</option>
-      <!-- Add more country options as needed -->
-    </select>
-    <input type="text" id="phone" name="phone" required><br>
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <select id="countryCode" name="countryCode">
+          <option value="US">United States (+1)</option>
+          <option value="IN">India (+91)</option>
+          <!-- Add more country options as needed -->
+        </select>
+        <input type="text" id="phone" name="phone" required>
+      </div>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required><br>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
 
-    <button type="button" onclick="go()">Go</button>
-  </form>
+      <button type="button" onclick="go()">Go</button>
+    </form>
 
-  <div id="spinner" class="spinner"></div>
+    <div id="spinner" class="spinner"></div>
+  </div>
 
   <script>
     const loginUrl = 'https://api.momence.com/auth/login';
@@ -78,6 +130,7 @@
             throw new Error('Authentication failed: ' + response.statusText);
           }
           const cookie = response.headers.get('Set-Cookie');
+          console.log('Authentication successful, cookie:', cookie);
           return cookie ? cookie.split(';')[0] : null; // Extract the session cookie
         })
         .catch(error => {
@@ -118,6 +171,7 @@
                 return response.json();
               })
               .then(data => {
+                console.log('First API call successful, data:', data);
                 const id = data.id;
 
                 // Make the second API calls
@@ -135,6 +189,7 @@
                     return response.json();
                   })))
                   .then(results => {
+                    console.log('Second API calls successful, results:', results);
                     const subscriptions = results[0];
                     const packs = results[1];
 
