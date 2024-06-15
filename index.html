@@ -3,365 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book a Trial</title>
-    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;500&display=swap" rel="stylesheet">
+    <title>Physique 57 Membership Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.5/css/flag-icons.min.css" />
     <style>
-        :root {
-            --primary-color: #1c90ff;
-            --hover-color: #003870;
-            --text-color: #333;
-            --input-background: #fff;
-            --input-border: #ccc;
-        }
         body {
-            font-family: 'Play', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .form-overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: transparent;
-            z-index: 1000;
-        }
-        .form-container {
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-            width: 300px;
-        }
-        .logo-container img {
-            max-width: 60px;
-            height: auto;
-            display: block;
-            margin: 10px auto;
-            margin-bottom: 10px;
-            margin-top: 0px;
-            align-items: right;
-        }
-        #lead-form {
-            padding: 10px;
-        }
-        #lead-form label, #lead-form p {
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 12px;
-            font-family: 'Play', sans-serif;
-        }
-        #lead-form input[type="text"], #lead-form input[type="email"], #lead-form input[type="tel"], #lead-form select {
-            width: calc(100% - 10px);
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid var(--input-border);
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-family: 'Play', sans-serif;
-            font-size: 12px;
-        }
-        #button-container {
+            font-family: 'Arial', sans-serif;
+            background: #f0f2f5;
             display: flex;
-            justify-content: space-between;
-            margin-top: 25px;
-            margin-bottom: 5px;
-            width: calc(100% - 10px);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
         }
-        button {
-            width: 48%;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-family: 'Play', sans-serif;
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
         }
-        button.submit {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            font-size: 12px;
-            font-family: 'Play', sans-serif;
+        .container img {
+            max-width: 100px;
+            margin-bottom: 1rem;
         }
-        button.submit:hover {
-            background-color: var(--hover-color);
+        .form-group {
+            margin-bottom: 1rem;
         }
-        button.close {
-            background-color: #888;
-            color: white;
-            border: none;
-            font-size: 12px;
-            font-family: 'Play', sans-serif;
-        }
-        button.close:hover {
-            background-color: #666;
-        }
-        small {
+        .form-group label {
             display: block;
-            font-size: 8px;
-            color: #666;
-            margin-top: -5px;
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
         }
-        .required {
-            color: red;
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
-        .hidden {
+        .spinner {
             display: none;
+            margin: 1rem auto;
+        }
+        .btn {
+            background: #007bff;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div class="form-overlay" id="form-overlay">
-        <div class="form-container">
-            <form id="lead-form">
-                <div class="logo-container">
-                    <img src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
-                </div>
-                <label for="firstName">First Name <span class="required">*</span></label>
-                <input type="text" id="firstName" name="firstName" required>
-
-                <label for="lastName">Last Name <span class="required">*</span></label>
-                <input type="text" id="lastName" name="lastName" required>
-
-                <label for="email">Email <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required>
-
-                <label for="phoneNumber">Phone Number <span class="required">*</span></label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="Enter your phone number">
-
-                <label for="center">Select a Studio Location<span class="required">*</span></label>
-                <select id="center" name="center" required>
-                    <option value="" disabled selected>Select Preferred Studio Location</option>
-                    <option value="Supreme Headquarters, Bandra">Supreme Headquarters, Bandra</option>
-                    <option value="Kwality House, Kemps Corner">Kwality House, Kemps Corner</option>
-                    <option value="Kenkere House, Bengaluru">Kenkere House, Bengaluru</option>
+    <div class="container">
+        <img src="https://i.imgur.com/9mOm7gP.png" alt="Physique 57 Logo">
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" required>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <div style="display: flex;">
+                <select id="countryCode" style="flex: 1 0 30%;">
+                    <option value="+91" selected>🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <!-- Add more country codes as needed -->
                 </select>
-
-                <div id="button-container">
-                    <button id="close-button" class="close">Close</button>
-                    <button type="submit" class="submit">Submit</button>
-                </div>
-            </form>
-
-            <div id="membership-container" class="hidden">
-                <p>Active Memberships:</p>
-                <form id="membership-form">
-                    <div id="membership-checkboxes"></div>
-                    <button type="submit" class="submit">Final Submit</button>
-                </form>
+                <input type="tel" id="phone" style="flex: 1 0 70%;" required>
             </div>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" required>
+        </div>
+        <button class="btn" id="goBtn">Go</button>
+        <div class="spinner" id="spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div id="membershipOptions" class="form-group" style="display:none;">
+            <label for="memberships">Select Membership/Pack</label>
+            <div id="memberships"></div>
+        </div>
+        <div id="datePickers" class="form-group" style="display:none;">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" required>
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" required>
+            <button class="btn" id="submitBtn">Submit</button>
         </div>
     </div>
 
     <script>
-        const loginUrl = 'https://api.momence.com/auth/login';
-        const email = 'jimmeey@physique57india.com';
-        const password = 'Jimmeey@123';
-        let sessionCookie = '';
+        document.getElementById('goBtn').addEventListener('click', async () => {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const countryCode = document.getElementById('countryCode').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const phoneNumber = countryCode + phone;
+
+            document.getElementById('spinner').style.display = 'block';
+
+            try {
+                const cookie = await authenticate('https://api.momence.com/auth/login', 'jimmeey@physique57india.com', 'Jimmeey@123');
+
+                if (cookie) {
+                    const searchResponse = await fetch(`https://api.momence.com/host/13752/search?query=${phoneNumber}&summary=true`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Cookie': cookie,
+                        },
+                    });
+
+                    const searchData = await searchResponse.json();
+                    const customerId = searchData.results[0].id;
+
+                    const subscriptionsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/subscriptions?type=active`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Cookie': cookie,
+                        },
+                    });
+
+                    const packsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Cookie': cookie,
+                        },
+                    });
+
+                    const subscriptions = await subscriptionsResponse.json();
+                    const packs = await packsResponse.json();
+
+                    const memberships = [...subscriptions, ...packs];
+
+                    const membershipsDiv = document.getElementById('memberships');
+                    membershipsDiv.innerHTML = '';
+                    memberships.forEach(m => {
+                        const label = document.createElement('label');
+                        label.innerHTML = `<input type="radio" name="membership" value="${m.id}"> ${m.name}`;
+                        membershipsDiv.appendChild(label);
+                    });
+
+                    document.getElementById('membershipOptions').style.display = 'block';
+                    document.getElementById('datePickers').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                document.getElementById('spinner').style.display = 'none';
+            }
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const selectedMembershipId = document.querySelector('input[name="membership"]:checked').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            document.getElementById('spinner').style.display = 'block';
+
+            try {
+                const cookie = await authenticate('https://api.momence.com/auth/login', 'jimmeey@physique57india.com', 'Jimmeey@123');
+
+                if (cookie) {
+                    await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-freeze`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Cookie': cookie,
+                        },
+                        body: JSON.stringify({ startDate, endDate }),
+                    });
+
+                    await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-unfreeze`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Cookie': cookie,
+                        },
+                        body: JSON.stringify({ startDate, endDate }),
+                    });
+
+                    alert('Membership freeze and unfreeze scheduled successfully');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                document.getElementById('spinner').style.display = 'none';
+            }
+        });
 
         async function authenticate(loginUrl, email, password) {
-            const loginHeaders = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            };
-
-            const loginPayload = {
-                email: email,
-                password: password,
-            };
-
             try {
                 const response = await fetch(loginUrl, {
                     method: 'POST',
-                    headers: loginHeaders,
-                    body: JSON.stringify(loginPayload),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
                 });
 
-                if (response.ok) {
-                    const cookie = response.headers.get('Set-Cookie');
-                    sessionCookie = cookie ? cookie.split(';')[0] : null; // Extract the session cookie
-                    console.log('Authentication successful. Session cookie:', sessionCookie);
-                    return sessionCookie;
-                } else {
-                    console.error('Authentication failed:', response.statusText);
-                    return null;
-                }
+                const cookie = response.headers.get('set-cookie');
+                return cookie ? cookie.split(';')[0] : null;
             } catch (error) {
                 console.error('Error during authentication:', error);
                 return null;
             }
         }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await authenticate(loginUrl, email, password);
-        });
-
-        const formOverlay = document.getElementById('form-overlay');
-        const closeButton = document.getElementById('close-button');
-        const submitButton = document.querySelector('button[type=submit]');
-        const membershipContainer = document.getElementById('membership-container');
-        const membershipForm = document.getElementById('membership-form');
-        const membershipCheckboxes = document.getElementById('membership-checkboxes');
-
-        closeButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            formOverlay.style.display = 'none';
-        });
-
-        document.getElementById('lead-form').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        submitButton.disabled = true;
-        submitButton.innerText = 'Submitting...';
-
-        const phoneNumber = document.getElementById('phoneNumber').value;
-
-        // API call to check if the member is in the system
-        const checkMemberUrl = `https://api.momence.com/host/13752/customers?phone=${phoneNumber}`;
-        try {
-            const response = await fetch(checkMemberUrl, {
-                headers: { 'Cookie': sessionCookie }
-            });
-
-            if (response.status === 403) {
-                console.error('Error 403: Forbidden - Check API permissions and authentication.');
-                alert('Access forbidden: Please check your API permissions.');
-                submitButton.disabled = false;
-                submitButton.innerText = 'Submit';
-                return;
-            }
-
-            if (response.status === 404) {
-                console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
-                alert('Resource not found: Please check the endpoint URL.');
-                submitButton.disabled = false;
-                submitButton.innerText = 'Submit';
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.length > 0) {
-                // Member found
-                try {
-                    const subscriptionUrl = `https://api.momence.com/host/13752/customers/${data[0].id}/memberships`;
-                    const packUrl = `https://api.momence.com/host/13752/package-events/${data[0].id}/memberships`;
-
-                    const [subscriptionsResponse, packsResponse] = await Promise.all([
-                        fetch(subscriptionUrl, { headers: { 'Cookie': sessionCookie } }),
-                        fetch(packUrl, { headers: { 'Cookie': sessionCookie }})
-                    ]);
-
-                    if (subscriptionsResponse.status === 403 || packsResponse.status === 403) {
-                        console.error('Error 403: Forbidden - Check API permissions and authentication.');
-                        alert('Access forbidden: Please check your API permissions.');
-                        submitButton.disabled = false;
-                        submitButton.innerText = 'Submit';
-                        return;
-                    }
-
-                    if (subscriptionsResponse.status === 404 || packsResponse.status === 404) {
-                        console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
-                        alert('Resource not found: Please check the endpoint URL.');
-                        submitButton.disabled = false;
-                        submitButton.innerText = 'Submit';
-                        return;
-                    }
-
-                    const subscriptions = await subscriptionsResponse.json();
-                    const packs = await packsResponse.json();
-
-                    // Clear existing checkboxes
-                    membershipCheckboxes.innerHTML = '';
-
-                    // Populate checkboxes with active subscriptions and packs
-                    [...subscriptions, ...packs].forEach(membership => {
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.name = 'membership';
-                        checkbox.value = membership.id;
-                        membershipCheckboxes.appendChild(checkbox);
-                        membershipCheckboxes.appendChild(document.createTextNode(membership.name));
-                        membershipCheckboxes.appendChild(document.createElement('br'));
-                    });
-
-                    // Show membership selection form
-                    membershipContainer.classList.remove('hidden');
-                } catch (error) {
-                    console.error('Error fetching memberships:', error);
-                }
-
-            } else {
-                // Member not found, submit the lead form
-                submitLeadForm();
-            }
-        } catch (error) {
-            console.error('Error checking member:', error);
-        }
-    });
-
-    function submitLeadForm() {
-        const formData = new FormData(document.getElementById('lead-form'));
-
-        fetch('https://api.momence.com/host/13752/customers', {
-            method: 'POST',
-            body: JSON.stringify(Object.fromEntries(formData)),
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': sessionCookie
-            }
-        })
-        .then(response => {
-            if (response.status === 403) {
-                console.error('Error 403: Forbidden - Check API permissions and authentication.');
-                alert('Access forbidden: Please check your API permissions.');
-                submitButton.disabled = false;
-                submitButton.innerText = 'Submit';
-                return;
-            }
-
-            if (response.status === 404) {
-                console.error('Error 404: Not Found - Check if the endpoint URL is correct.');
-                alert('Resource not found: Please check the endpoint URL.');
-                submitButton.disabled = false;
-                submitButton.innerText = 'Submit';
-                return;
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return response.json();
-        })
-        .then(data => {
-            alert('Lead submitted successfully.');
-            submitButton.disabled = false;
-            submitButton.innerText = 'Submit';
-            formOverlay.style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Error submitting lead:', error);
-            submitButton.disabled = false;
-            submitButton.innerText = 'Submit';
-        });
-    }
-
-    membershipForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const selectedMemberships = Array.from(document.querySelectorAll('input[name="membership"]:checked'))
-            .map(checkbox => checkbox.value);
-
-        // Handle the selected memberships as needed
-        alert('Selected memberships: ' + selectedMemberships.join(', '));
-
-        // You can add the necessary API calls or logic here to handle the selected memberships
-
-        formOverlay.style.display = 'none';
-    });
-</script>
-
+    </script>
+</body>
+</html>
