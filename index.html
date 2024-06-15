@@ -1,333 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>API Form</title>
-  <style>
-    /* Add your custom styles here */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      width: 100%;
-    }
-    .logo {
-      display: block;
-      margin: 0 auto 20px;
-      max-width: 200px;
-    }
-    .spinner {
-      display: none;
-      margin: 20px auto;
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-    }
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #3498db;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    button:hover {
-      background-color: #2980b9;
-    }
-  </style>
+<meta charset="UTF8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Membership Form</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .container { width: 80%; margin: auto; padding: 20px; }
+  input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+  .hidden { display: none; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
 </head>
 <body>
-  <div class="container">
-    <img class="logo" src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
-
-    <form id="apiForm">
-      <div class="form-group">
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" name="firstName" required>
-      </div>
-
-      <div class="form-group">
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" name="lastName" required>
-      </div>
-
-      <div class="form-group">
-        <label for="phone">Phone Number:</label>
-        <select id="countryCode" name="countryCode">
-          <option value="US">United States (+1)</option>
-          <option value="IN">India (+91)</option>
-          <!-- Add more country options as needed -->
-        </select>
-        <input type="text" id="phone" name="phone" required>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-      </div>
-
-      <button type="button" onclick="go()">Go</button>
+<div class="container">
+  <img src="https://i.imgur.com/9mOm7gP.png" alt="Logo" style="width: 100px; display: block; margin: auto;">
+  <form id="userForm">
+    <input type="text" id="firstName" placeholder="First Name" required>
+    <input type="text" id="lastName" placeholder="Last Name" required>
+    <select id="phoneCode" required>
+      <option value="+1">United States (+1)</option>
+      <option value="+91">India (+91)</option>
+      <!-- Add other countries as needed -->
+    </select>
+    <input type="text" id="phoneNumber" placeholder="Phone Number" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <button type="button" onclick="authenticateAndSearch()">Go</button>
+  </form>
+  <div id="membershipOptions" class="hidden">
+    <form id="membershipForm">
+      <!-- Membership options will be populated here -->
+      <input type="date" id="startDate" required>
+      <input type="date" id="endDate" required>
+      <button type="button" onclick="submitMembership()">Submit</button>
     </form>
-
-    <div id="spinner" class="spinner"></div>
   </div>
+  <div id="spinner" class="hidden">Loading...</div>
+</div>
 
-  <script>
-    const loginUrl = 'https://api.momence.com/auth/login';
-    const email = 'jimmeey@physique57india.com';
-    const password = 'Jimmeey@123';
+<script>
+const loginUrl = 'https://api.momence.com/auth/login';
+const email = 'jimmeey@physique57india.com';
+const password = 'Jimmeey@123';
+let sessionCookie = null;
 
-    function authenticate() {
-      const loginHeaders = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      };
+function authenticateAndSearch() {
+  showSpinner(true);
+  const loginHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  const loginPayload = JSON.stringify({ email, password });
 
-      const loginPayload = {
-        email: email,
-        password: password,
-      };
+  fetch(loginUrl, {
+    method: 'POST',
+    headers: loginHeaders,
+    body: loginPayload
+  })
+  .then(response => response.json())
+  .then(data => {
+    sessionCookie = data.headers['Set-Cookie'].split(';')[0];
+    searchCustomer();
+  })
+  .catch(error => {
+    console.error('Error during authentication:', error);
+    showSpinner(false);
+  });
+}
 
-      return fetch(loginUrl, {
-        method: 'POST',
-        headers: loginHeaders,
-        body: JSON.stringify(loginPayload),
-        credentials: 'include' // Ensure cookies are included
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Authentication failed: ' + response.statusText);
-          }
-          const cookie = response.headers.get('Set-Cookie');
-          console.log('Authentication successful, cookie:', cookie);
-          return cookie ? cookie.split(';')[0] : null; // Extract the session cookie
-        })
-        .catch(error => {
-          console.error('Error during authentication:', error);
-          return null;
-        });
-    }
+function searchCustomer() {
+  const phoneNumber = document.getElementById('phoneCode').value + document.getElementById('phoneNumber').value;
+  const searchUrl = `https://api.momence.com/host/13752/search?query=${phoneNumber}&summary=true`;
 
-    function go() {
-      const form = document.getElementById('apiForm');
-      const firstName = form.elements.firstName.value;
-      const lastName = form.elements.lastName.value;
-      const countryCode = form.elements.countryCode.value;
-      const phone = form.elements.phone.value;
-      const email = form.elements.email.value;
+  fetch(searchUrl, {
+    method: 'GET',
+    headers: { 'Cookie': sessionCookie }
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Assuming data contains customer ID
+    fetchMemberships(data.customerId);
+  })
+  .catch(error => {
+    console.error('Error fetching customer:', error);
+    showSpinner(false);
+  });
+}
 
-      // Show spinner
-      const spinner = document.getElementById('spinner');
-      spinner.style.display = 'block';
+function fetchMemberships(customerId) {
+  const subscriptionsUrl = `https://readonly-api.momence.com/host/13752/customers/${customerId}/subscriptions?type=active`;
+  const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`;
 
-      authenticate()
-        .then(cookie => {
-          if (cookie) {
-            const apiUrl = `https://api.momence.com/host/13752/search?query=${phone}&summary=true`;
+  Promise.all([
+    fetch(subscriptionsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => res.json()),
+    fetch(packsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => res.json())
+  ])
+  .then(([subscriptions, packs]) => {
+    const memberships = [...subscriptions, ...packs];
+    displayMembershipOptions(memberships);
+    showSpinner(false);
+  })
+  .catch(error => {
+    console.error('Error fetching memberships:', error);
+    showSpinner(false);
+  });
+}
 
-            // Make the first API call
-            return fetch(apiUrl, {
-              headers: {
-                'Cookie': cookie,
-                'Content-Type': 'application/json'
-              },
-              credentials: 'include' // Ensure cookies are included
-            })
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error('Error during API call: ' + response.statusText);
-                }
-                return response.json();
-              })
-              .then(data => {
-                console.log('First API call successful, data:', data);
-                const id = data.id;
+function displayMembershipOptions(memberships) {
+  const container = document.getElementById('membershipOptions');
+  container.innerHTML = '';
+  memberships.forEach(membership => {
+    const option = document.createElement('input');
+    option.type = 'checkbox';
+    option.value = membership.id;
+    option.id = 'membership' + membership.id;
+    container.appendChild(option);
 
-                // Make the second API calls
-                const subscriptionsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/subscriptions?type=active`;
-                const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/packs?type=active`;
+    const label = document.createElement('label');
+    label.htmlFor = 'membership' + membership.id;
+    label.textContent = membership.name;
+    container.appendChild(label);
+  });
+  container.classList.remove('hidden');
+}
 
-                return Promise.all([
-                  fetch(subscriptionsUrl, { headers: { 'Cookie': cookie, 'Content-Type': 'application/json' }, credentials: 'include' }),
-                  fetch(packsUrl, { headers: { 'Cookie': cookie, 'Content-Type': 'application/json' }, credentials: 'include' })
-                ])
-                  .then(responses => Promise.all(responses.map(response => {
-                    if (!response.ok) {
-                      throw new Error('Error during API call: ' + response.statusText);
-                    }
-                    return response.json();
-                  })))
-                  .then(results => {
-                    console.log('Second API calls successful, results:', results);
-                    const subscriptions = results[0];
-                    const packs = results[1];
+function submitMembership() {
+  const selectedMembershipId = document.querySelector('input[type="checkbox"]:checked').value;
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const freezeUrl = `https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-freeze`;
+  const unfreezeUrl = `https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-unfreeze`;
 
-                    // Hide spinner
-                    spinner.style.display = 'none';
+  Promise.all([
+    fetch(freezeUrl, {
+      method: 'POST',
+      headers: { 'Cookie': sessionCookie },
+      body: JSON.stringify({ startDate, endDate })
+    }),
+    fetch(unfreezeUrl, {
+      method: 'POST',
+      headers: { 'Cookie': sessionCookie },
+      body: JSON.stringify({ startDate, endDate })
+    })
+  ])
+  .then(() => {
+    alert('Membership updated successfully!');
+    showSpinner(false);
+  })
+  .catch(error => {
+    console.error('Error updating membership:', error);
+    showSpinner(false);
+  });
+}
 
-                    // Display the memberships/packs as tickbox options
-                    const membershipsDiv = document.createElement('div');
-                    membershipsDiv.innerHTML = '<h3>Memberships/Packs:</h3>';
-                    form.appendChild(membershipsDiv);
-
-                    subscriptions.forEach(subscription => {
-                      const checkbox = document.createElement('input');
-                      checkbox.type = 'checkbox';
-                      checkbox.name = 'membership';
-                      checkbox.value = subscription.id;
-
-                      const label = document.createElement('label');
-                      label.textContent = subscription.name;
-
-                      membershipsDiv.appendChild(checkbox);
-                      membershipsDiv.appendChild(label);
-                      membershipsDiv.appendChild(document.createElement('br'));
-                    });
-
-                    packs.forEach(pack => {
-                      const checkbox = document.createElement('input');
-                      checkbox.type = 'checkbox';
-                      checkbox.name = 'membership';
-                      checkbox.value = pack.id;
-
-                      const label = document.createElement('label');
-                      label.textContent = pack.name;
-
-                      membershipsDiv.appendChild(checkbox);
-                      membershipsDiv.appendChild(label);
-                      membershipsDiv.appendChild(document.createElement('br'));
-                    });
-
-                    // Add date picker fields and submit button
-                    const startDateLabel = document.createElement('label');
-                    startDateLabel.textContent = 'Start Date:';
-                    const startDateInput = document.createElement('input');
-                    startDateInput.type = 'date';
-
-                    const endDateLabel = document.createElement('label');
-                    endDateLabel.textContent = 'End Date:';
-                    const endDateInput = document.createElement('input');
-                    endDateInput.type = 'date';
-
-                    const submitButton = document.createElement('button');
-                    submitButton.type = 'button';
-                    submitButton.textContent = 'Submit';
-                    submitButton.addEventListener('click', () => {
-                      const selectedMemberships = Array.from(form.elements.membership)
-                        .filter(checkbox => checkbox.checked)
-                        .map(checkbox => checkbox.value);
-
-                      // Make the third and fourth API calls
-                      selectedMemberships.forEach(membershipId => {
-                        const freezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-freeze`;
-                        const unfreezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-unfreeze`;
-
-                        // Make the third API call
-                        fetch(freezeUrl, {
-                          method: 'POST',
-                          headers: {
-                            'Cookie': cookie,
-                            'Content-Type': 'application/json'
-                          },
-                          body: JSON.stringify({
-                            start_date: startDateInput.value,
-                            end_date: endDateInput.value
-                          }),
-                          credentials: 'include' // Ensure cookies are included
-                        })
-                          .then(response => {
-                            if (!response.ok) {
-                              throw new Error('Error during freeze API call: ' + response.statusText);
-                            }
-                            return response.json();
-                          })
-                          .then(data => {
-                            console.log('Freeze response:', data);
-                          })
-                          .catch(error => {
-                            console.error('Error during freeze API call:', error);
-                          });
-
-                        // Make the fourth API call
-                        fetch(unfreezeUrl, {
-                          method: 'POST',
-                          headers: {
-                            'Cookie': cookie,
-                            'Content-Type': 'application/json'
-                          },
-                          body: JSON.stringify({
-                            start_date: startDateInput.value,
-                            end_date: endDateInput.value
-                          }),
-                          credentials: 'include' // Ensure cookies are included
-                        })
-                          .then(response => {
-                            if (!response.ok) {
-                              throw new Error('Error during unfreeze API call: ' + response.statusText);
-                            }
-                            return response.json();
-                          })
-                          .then(data => {
-                            console.log('Unfreeze response:', data);
-                          })
-                          .catch(error => {
-                            console.error('Error during unfreeze API call:', error);
-                          });
-                      });
-                    });
-
-                    form.appendChild(startDateLabel);
-                    form.appendChild(startDateInput);
-                    form.appendChild(document.createElement('br'));
-                    form.appendChild(endDateLabel);
-                    form.appendChild(endDateInput);
-                    form.appendChild(document.createElement('br'));
-                    form.appendChild(submitButton);
-                  });
-              });
-          } else {
-            throw new Error('Authentication failed. Unable to retrieve session cookie.');
-          }
-        })
-        .catch(error => {
-          // Hide spinner
-          spinner.style.display = 'none';
-
-          // Handle errors
-          console.error('Error:', error);
-        });
-    }
-  </script>
+function showSpinner(show) {
+  const spinner = document.getElementById('spinner');
+  spinner.style.display = show ? 'block' : 'none';
+}
+</script>
 </body>
 </html>
