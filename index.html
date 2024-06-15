@@ -1,248 +1,202 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physique 57 Membership Form</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.5/css/flag-icons.min.css" />
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: #fff;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-        .container img {
-            max-width: 100px;
-            margin-bottom: 1rem;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .spinner {
-            display: none;
-            margin: 1rem auto;
-        }
-        .btn {
-            background: #007bff;
-            color: #fff;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background: #0056b3;
-        }
-    </style>
+  <title>API Form</title>
+  <style>
+    /* Add your custom styles here */
+    .logo {
+      display: block;
+      margin: 20px auto;
+      max-width: 200px;
+    }
+    .spinner {
+      display: none;
+      margin: 20px auto;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <img src="https://i.imgur.com/9mOm7gP.png" alt="Physique 57 Logo">
-        <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" required>
-        </div>
-        <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" required>
-        </div>
-        <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <div style="display: flex;">
-                <select id="countryCode" style="flex: 1 0 30%;">
-                    <option value="+91" selected>🇮🇳 +91</option>
-                    <option value="+1">🇺🇸 +1</option>
-                    <option value="+44">🇬🇧 +44</option>
-                    <!-- Add more country codes as needed -->
-                </select>
-                <input type="tel" id="phone" style="flex: 1 0 70%;" required>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" required>
-        </div>
-        <button class="btn" id="goBtn">Go</button>
-        <div class="spinner" id="spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-        </div>
-        <div id="membershipOptions" class="form-group" style="display:none;">
-            <label for="memberships">Select Membership/Pack</label>
-            <div id="memberships"></div>
-        </div>
-        <div id="datePickers" class="form-group" style="display:none;">
-            <label for="startDate">Start Date</label>
-            <input type="date" id="startDate" required>
-            <label for="endDate">End Date</label>
-            <input type="date" id="endDate" required>
-            <button class="btn" id="submitBtn">Submit</button>
-        </div>
-    </div>
+  <img class="logo" src="https://i.imgur.com/9mOm7gP.png" alt="Logo">
 
-    <script>
-        document.getElementById('goBtn').addEventListener('click', async () => {
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const countryCode = document.getElementById('countryCode').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
-            const phoneNumber = countryCode + phone;
+  <form id="apiForm">
+    <label for="firstName">First Name:</label>
+    <input type="text" id="firstName" name="firstName" required><br>
 
-            document.getElementById('spinner').style.display = 'block';
+    <label for="lastName">Last Name:</label>
+    <input type="text" id="lastName" name="lastName" required><br>
 
-            try {
-                const cookie = await authenticate();
+    <label for="phone">Phone Number:</label>
+    <select id="countryCode" name="countryCode">
+      <option value="US">United States (+1)</option>
+      <option value="IN">India (+91)</option>
+      <!-- Add more country options as needed -->
+    </select>
+    <input type="text" id="phone" name="phone" required><br>
 
-                if (cookie) {
-                    const searchResponse = await fetch(`https://api.momence.com/host/13752/search?query=${phoneNumber}&summary=true`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Cookie': cookie,
-                        },
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required><br>
+
+    <button type="button" onclick="go()">Go</button>
+  </form>
+
+  <div id="spinner" class="spinner"></div>
+
+  <script>
+    function go() {
+      const form = document.getElementById('apiForm');
+      const firstName = form.elements.firstName.value;
+      const lastName = form.elements.lastName.value;
+      const countryCode = form.elements.countryCode.value;
+      const phone = form.elements.phone.value;
+      const email = form.elements.email.value;
+
+      const apiUrl = `https://api.momence.com/host/13752/search?query=${phone}&summary=true`;
+
+      // Show spinner
+      const spinner = document.getElementById('spinner');
+      spinner.style.display = 'block';
+
+      // Make the first API call
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          const id = data.id;
+
+          // Make the second API calls
+          const subscriptionsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/subscriptions?type=active`;
+          const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/packs?type=active`;
+
+          Promise.all([
+            fetch(subscriptionsUrl),
+            fetch(packsUrl)
+          ])
+            .then(responses => Promise.all(responses.map(response => response.json())))
+            .then(results => {
+              const subscriptions = results[0];
+              const packs = results[1];
+
+              // Hide spinner
+              spinner.style.display = 'none';
+
+              // Display the memberships/packs as tickbox options
+              // You can modify this part to suit your needs
+              const membershipsDiv = document.createElement('div');
+              membershipsDiv.innerHTML = '<h3>Memberships/Packs:</h3>';
+              form.appendChild(membershipsDiv);
+
+              subscriptions.forEach(subscription => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'membership';
+                checkbox.value = subscription.id;
+
+                const label = document.createElement('label');
+                label.textContent = subscription.name;
+
+                membershipsDiv.appendChild(checkbox);
+                membershipsDiv.appendChild(label);
+                membershipsDiv.appendChild(document.createElement('br'));
+              });
+
+              packs.forEach(pack => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'membership';
+                checkbox.value = pack.id;
+
+                const label = document.createElement('label');
+                label.textContent = pack.name;
+
+                membershipsDiv.appendChild(checkbox);
+                membershipsDiv.appendChild(label);
+                membershipsDiv.appendChild(document.createElement('br'));
+              });
+
+              // Add date picker fields and submit button
+              // You can use a library like jQuery UI for date pickers
+              const startDateLabel = document.createElement('label');
+              startDateLabel.textContent = 'Start Date:';
+              const startDateInput = document.createElement('input');
+              startDateInput.type = 'date';
+
+              const endDateLabel = document.createElement('label');
+              endDateLabel.textContent = 'End Date:';
+              const endDateInput = document.createElement('input');
+              endDateInput.type = 'date';
+
+              const submitButton = document.createElement('button');
+              submitButton.type = 'button';
+              submitButton.textContent = 'Submit';
+              submitButton.addEventListener('click', () => {
+                const selectedMemberships = Array.from(form.elements.membership)
+                  .filter(checkbox => checkbox.checked)
+                  .map(checkbox => checkbox.value);
+
+                // Make the third and fourth API calls
+                selectedMemberships.forEach(membershipId => {
+                  const freezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-freeze`;
+                  const unfreezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-unfreeze`;
+
+                  // Make the third API call
+                  fetch(freezeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                      // Handle the response
+                      console.log(data);
+                    })
+                    .catch(error => {
+                      // Handle errors
+                      console.error('Error during freeze API call:', error);
                     });
 
-                    const searchData = await searchResponse.json();
-                    if (searchData.results && searchData.results.length > 0) {
-                        const customerId = searchData.results[0].id;
-
-                        const subscriptionsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/subscriptions?type=active`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Cookie': cookie,
-                            },
-                        });
-
-                        const packsResponse = await fetch(`https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Cookie': cookie,
-                            },
-                        });
-
-                        const subscriptions = await subscriptionsResponse.json();
-                        const packs = await packsResponse.json();
-
-                        const memberships = [...subscriptions, ...packs];
-
-                        const membershipsDiv = document.getElementById('memberships');
-                        membershipsDiv.innerHTML = '';
-                        memberships.forEach(m => {
-                            const label = document.createElement('label');
-                            label.innerHTML = `<input type="radio" name="membership" value="${m.id}"> ${m.name}`;
-                            membershipsDiv.appendChild(label);
-                        });
-
-                        document.getElementById('membershipOptions').style.display = 'block';
-                        document.getElementById('datePickers').style.display = 'block';
-                    } else {
-                        alert('No customer found with the provided phone number.');
-                    }
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            } finally {
-                document.getElementById('spinner').style.display = 'none';
-            }
-        });
-
-        document.getElementById('submitBtn').addEventListener('click', async () => {
-            const selectedMembershipId = document.querySelector('input[name="membership"]:checked').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
-            document.getElementById('spinner').style.display = 'block';
-
-            try {
-                const cookie = await authenticate();
-
-                if (cookie) {
-                    const freezeResponse = await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-freeze`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Cookie': cookie,
-                        },
-                        body: JSON.stringify({ startDate, endDate }),
+                  // Make the fourth API call
+                  fetch(unfreezeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                      // Handle the response
+                      console.log(data);
+                    })
+                    .catch(error => {
+                      // Handle errors
+                      console.error('Error during unfreeze API call:', error);
                     });
-
-                    if (freezeResponse.ok) {
-                        const unfreezeResponse = await fetch(`https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-unfreeze`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Cookie': cookie,
-                            },
-                            body: JSON.stringify({ startDate, endDate }),
-                        });
-
-                        if (unfreezeResponse.ok) {
-                            alert('Membership freeze and unfreeze scheduled successfully');
-                        } else {
-                            alert('Failed to schedule unfreeze.');
-                        }
-                    } else {
-                        alert('Failed to schedule freeze.');
-                    }
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            } finally {
-                document.getElementById('spinner').style.display = 'none';
-            }
-        });
-
-        async function authenticate() {
-            try {
-                const response = await fetch('https://api.momence.com/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ email: 'jimmeey@physique57india.com', password: 'Jimmeey@123' }),
                 });
+              });
 
-                if (response.ok) {
-                    const cookieHeader = response.headers.get('set-cookie');
-                    return cookieHeader ? cookieHeader.split(';')[0] : null;
-                } else {
-                    throw new Error('Failed to authenticate');
-                }
-            } catch (error) {
-                console.error('Error during authentication:', error);
-                return null;
-            }
-        }
-    </script>
+              form.appendChild(startDateLabel);
+              form.appendChild(startDateInput);
+              form.appendChild(document.createElement('br'));
+              form.appendChild(endDateLabel);
+              form.appendChild(endDateInput);
+              form.appendChild(document.createElement('br'));
+              form.appendChild(submitButton);
+            })
+            .catch(error => {
+              // Hide spinner
+              spinner.style.display = 'none';
+
+              // Handle errors
+              console.error('Error during API calls:', error);
+            });
+        })
+        .catch(error => {
+          // Hide spinner
+          spinner.style.display = 'none';
+
+          // Handle errors
+          console.error('Error during API call:', error);
+        });
+    }
+  </script>
 </body>
 </html>
