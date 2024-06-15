@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Membership Form</title>
 <style>
-  body { font-family: Arial, sans-serif; }
-  .container { width: 80%; margin: auto; padding: 20px; }
-  input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+  body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  .container { width: 80%; margin: auto; padding: 20px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; }
+  input, select, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+  button { background-color: #007BFF; color: white; border: none; cursor: pointer; }
+  button:hover { background-color: #0056b3; }
   .hidden { display: none; }
+  .spinner { display: none; margin: 20px auto; border: 4px solid #f3f3f3; border-top: 4px solid #007BFF; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
 </head>
@@ -35,7 +39,7 @@
       <button type="button" onclick="submitMembership()">Submit</button>
     </form>
   </div>
-  <div id="spinner" class="hidden">Loading...</div>
+  <div id="spinner" class="spinner"></div>
 </div>
 
 <script>
@@ -57,8 +61,14 @@ function authenticateAndSearch() {
     headers: loginHeaders,
     body: loginPayload
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Authentication failed with status: ' + response.status);
+    }
+    return response.json();
+  })
   .then(data => {
+    console.log('Authentication successful, received data:', data);
     sessionCookie = data.headers['Set-Cookie'].split(';')[0];
     searchCustomer();
   })
@@ -76,9 +86,14 @@ function searchCustomer() {
     method: 'GET',
     headers: { 'Cookie': sessionCookie }
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to fetch customer with status: ' + response.status);
+    }
+    return response.json();
+  })
   .then(data => {
-    // Assuming data contains customer ID
+    console.log('Customer search successful, received data:', data);
     fetchMemberships(data.customerId);
   })
   .catch(error => {
@@ -92,10 +107,21 @@ function fetchMemberships(customerId) {
   const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`;
 
   Promise.all([
-    fetch(subscriptionsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => res.json()),
-    fetch(packsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => res.json())
+    fetch(subscriptionsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => {
+      if (!res.ok) {
+        throw new Error('Failed to fetch subscriptions with status: ' + res.status);
+      }
+      return res.json();
+    }),
+    fetch(packsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => {
+      if (!res.ok) {
+        throw new Error('Failed to fetch packs with status: ' + res.status);
+      }
+      return res.json();
+    })
   ])
   .then(([subscriptions, packs]) => {
+    console.log('Fetched memberships:', { subscriptions, packs });
     const memberships = [...subscriptions, ...packs];
     displayMembershipOptions(memberships);
     showSpinner(false);
