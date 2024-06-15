@@ -52,6 +52,36 @@
   <div id="spinner" class="spinner"></div>
 
   <script>
+    const loginUrl = 'https://api.momence.com/auth/login';
+    const email = 'jimmeey@physique57india.com';
+    const password = 'Jimmeey@123';
+
+    function authenticate(loginUrl, email, password) {
+      const loginHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      const loginPayload = {
+        email: email,
+        password: password,
+      };
+
+      return fetch(loginUrl, {
+        method: 'POST',
+        headers: loginHeaders,
+        body: JSON.stringify(loginPayload),
+      })
+        .then(response => {
+          const cookie = response.headers.get('Set-Cookie');
+          return cookie ? cookie.split(';')[0] : null; // Extract the session cookie
+        })
+        .catch(error => {
+          console.error('Error during authentication:', error);
+          return null;
+        });
+    }
+
     function go() {
       const form = document.getElementById('apiForm');
       const firstName = form.elements.firstName.value;
@@ -60,141 +90,181 @@
       const phone = form.elements.phone.value;
       const email = form.elements.email.value;
 
-      const apiUrl = `https://api.momence.com/host/13752/search?query=${phone}&summary=true`;
-
       // Show spinner
       const spinner = document.getElementById('spinner');
       spinner.style.display = 'block';
 
-      // Make the first API call
-      fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-          const id = data.id;
+      authenticate(loginUrl, email, password)
+        .then(cookie => {
+          if (cookie) {
+            const apiUrl = `https://api.momence.com/host/13752/search?query=${phone}&summary=true`;
 
-          // Make the second API calls
-          const subscriptionsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/subscriptions?type=active`;
-          const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/packs?type=active`;
-
-          Promise.all([
-            fetch(subscriptionsUrl),
-            fetch(packsUrl)
-          ])
-            .then(responses => Promise.all(responses.map(response => response.json())))
-            .then(results => {
-              const subscriptions = results[0];
-              const packs = results[1];
-
-              // Hide spinner
-              spinner.style.display = 'none';
-
-              // Display the memberships/packs as tickbox options
-              // You can modify this part to suit your needs
-              const membershipsDiv = document.createElement('div');
-              membershipsDiv.innerHTML = '<h3>Memberships/Packs:</h3>';
-              form.appendChild(membershipsDiv);
-
-              subscriptions.forEach(subscription => {
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.name = 'membership';
-                checkbox.value = subscription.id;
-
-                const label = document.createElement('label');
-                label.textContent = subscription.name;
-
-                membershipsDiv.appendChild(checkbox);
-                membershipsDiv.appendChild(label);
-                membershipsDiv.appendChild(document.createElement('br'));
-              });
-
-              packs.forEach(pack => {
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.name = 'membership';
-                checkbox.value = pack.id;
-
-                const label = document.createElement('label');
-                label.textContent = pack.name;
-
-                membershipsDiv.appendChild(checkbox);
-                membershipsDiv.appendChild(label);
-                membershipsDiv.appendChild(document.createElement('br'));
-              });
-
-              // Add date picker fields and submit button
-              // You can use a library like jQuery UI for date pickers
-              const startDateLabel = document.createElement('label');
-              startDateLabel.textContent = 'Start Date:';
-              const startDateInput = document.createElement('input');
-              startDateInput.type = 'date';
-
-              const endDateLabel = document.createElement('label');
-              endDateLabel.textContent = 'End Date:';
-              const endDateInput = document.createElement('input');
-              endDateInput.type = 'date';
-
-              const submitButton = document.createElement('button');
-              submitButton.type = 'button';
-              submitButton.textContent = 'Submit';
-              submitButton.addEventListener('click', () => {
-                const selectedMemberships = Array.from(form.elements.membership)
-                  .filter(checkbox => checkbox.checked)
-                  .map(checkbox => checkbox.value);
-
-                // Make the third and fourth API calls
-                selectedMemberships.forEach(membershipId => {
-                  const freezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-freeze`;
-                  const unfreezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-unfreeze`;
-
-                  // Make the third API call
-                  fetch(freezeUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                      // Handle the response
-                      console.log(data);
-                    })
-                    .catch(error => {
-                      // Handle errors
-                      console.error('Error during freeze API call:', error);
-                    });
-
-                  // Make the fourth API call
-                  fetch(unfreezeUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                      // Handle the response
-                      console.log(data);
-                    })
-                    .catch(error => {
-                      // Handle errors
-                      console.error('Error during unfreeze API call:', error);
-                    });
-                });
-              });
-
-              form.appendChild(startDateLabel);
-              form.appendChild(startDateInput);
-              form.appendChild(document.createElement('br'));
-              form.appendChild(endDateLabel);
-              form.appendChild(endDateInput);
-              form.appendChild(document.createElement('br'));
-              form.appendChild(submitButton);
+            // Make the first API call
+            fetch(apiUrl, {
+              headers: {
+                'Cookie': cookie,
+              },
             })
-            .catch(error => {
-              // Hide spinner
-              spinner.style.display = 'none';
+              .then(response => {
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  throw new Error('Error during API call: ' + response.status);
+                }
+              })
+              .then(data => {
+                const id = data.id;
 
-              // Handle errors
-              console.error('Error during API calls:', error);
-            });
-        })
-        .catch(error => {
-          // Hide spinner
-          spinner.style.display = 'none';
+                // Make the second API calls
+                const subscriptionsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/subscriptions?type=active`;
+                const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${id}/packs?type=active`;
 
-          // Handle errors
-          console.error('Error during API call:', error);
+                Promise.all([
+                  fetch(subscriptionsUrl),
+                  fetch(packsUrl)
+                ])
+                  .then(responses => Promise.all(responses.map(response => response.json())))
+                  .then(results => {
+                    const subscriptions = results[0];
+                    const packs = results[1];
+
+                    // Hide spinner
+                    spinner.style.display = 'none';
+
+                    // Display the memberships/packs as tickbox options
+                    // You can modify this part to suit your needs
+                    const membershipsDiv = document.createElement('div');
+                    membershipsDiv.innerHTML = '<h3>Memberships/Packs:</h3>';
+                    form.appendChild(membershipsDiv);
+
+                    subscriptions.forEach(subscription => {
+                      const checkbox = document.createElement('input');
+                      checkbox.type = 'checkbox';
+                      checkbox.name = 'membership';
+                      checkbox.value = subscription.id;
+
+                      const label = document.createElement('label');
+                      label.textContent = subscription.name;
+
+                      membershipsDiv.appendChild(checkbox);
+                      membershipsDiv.appendChild(label);
+                      membershipsDiv.appendChild(document.createElement('br'));
+                    });
+
+                    packs.forEach(pack => {
+                      const checkbox = document.createElement('input');
+                      checkbox.type = 'checkbox';
+                      checkbox.name = 'membership';
+                      checkbox.value = pack.id;
+
+                      const label = document.createElement('label');
+                      label.textContent = pack.name;
+
+                      membershipsDiv.appendChild(checkbox);
+                      membershipsDiv.appendChild(label);
+                      membershipsDiv.appendChild(document.createElement('br'));
+                    });
+
+                    // Add date picker fields and submit button
+                    // You can use a library like jQuery UI for date pickers
+                    const startDateLabel = document.createElement('label');
+                    startDateLabel.textContent = 'Start Date:';
+                    const startDateInput = document.createElement('input');
+                    startDateInput.type = 'date';
+
+                    const endDateLabel = document.createElement('label');
+                    endDateLabel.textContent = 'End Date:';
+                    const endDateInput = document.createElement('input');
+                    endDateInput.type = 'date';
+
+                    const submitButton = document.createElement('button');
+                    submitButton.type = 'button';
+                    submitButton.textContent = 'Submit';
+                    submitButton.addEventListener('click', () => {
+                      const selectedMemberships = Array.from(form.elements.membership)
+                        .filter(checkbox => checkbox.checked)
+                        .map(checkbox => checkbox.value);
+
+                      // Make the third and fourth API calls
+                      selectedMemberships.forEach(membershipId => {
+                        const freezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-freeze`;
+                        const unfreezeUrl = `https://api.momence.com/host/13752/bought-memberships/${membershipId}/schedule-unfreeze`;
+
+                        // Make the third API call
+                        fetch(freezeUrl, {
+                          headers: {
+                            'Cookie': cookie,
+                          },
+                        })
+                          .then(response => {
+                            if (response.ok) {
+                              return response.json();
+                            } else {
+                              throw new Error('Error during freeze API call: ' + response.status);
+                            }
+                          })
+                          .then(data => {
+                            // Handle the response
+                            console.log(data);
+                          })
+                          .catch(error => {
+                            // Handle errors
+                            console.error('Error during freeze API call:', error);
+                          });
+
+                        // Make the fourth API call
+                        fetch(unfreezeUrl, {
+                          headers: {
+                            'Cookie': cookie,
+                          },
+                        })
+                          .then(response => {
+                            if (response.ok) {
+                              return response.json();
+                            } else {
+                              throw new Error('Error during unfreeze API call: ' + response.status);
+                            }
+                          })
+                          .then(data => {
+                            // Handle the response
+                            console.log(data);
+                          })
+                          .catch(error => {
+                            // Handle errors
+                            console.error('Error during unfreeze API call:', error);
+                          });
+                      });
+                    });
+
+                    form.appendChild(startDateLabel);
+                    form.appendChild(startDateInput);
+                    form.appendChild(document.createElement('br'));
+                    form.appendChild(endDateLabel);
+                    form.appendChild(endDateInput);
+                    form.appendChild(document.createElement('br'));
+                    form.appendChild(submitButton);
+                  })
+                  .catch(error => {
+                    // Hide spinner
+                    spinner.style.display = 'none';
+
+                    // Handle errors
+                    console.error('Error during API calls:', error);
+                  });
+              })
+              .catch(error => {
+                // Hide spinner
+                spinner.style.display = 'none';
+
+                // Handle errors
+                console.error('Error during API call:', error);
+              });
+          } else {
+            // Hide spinner
+            spinner.style.display = 'none';
+
+            console.error('Authentication failed. Unable to retrieve session cookie.');
+          }
         });
     }
   </script>
