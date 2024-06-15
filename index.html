@@ -1,197 +1,230 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Membership Form</title>
-<style>
-  body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-  .container { width: 80%; margin: auto; padding: 20px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; }
-  input, select, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-  button { background-color: #007BFF; color: white; border: none; cursor: pointer; }
-  button:hover { background-color: #0056b3; }
-  .hidden { display: none; }
-  .spinner { display: none; margin: 20px auto; border: 4px solid #f3f3f3; border-top: 4px solid #007BFF; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-</style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Play&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1c90ff;
+            --hover-color: #003870;
+            --text-color: #333;
+            --input-background: #fff;
+            --input-border: #ccc;
+        }
+        body {
+            font-family: 'Play', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .form-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            width: 300px;
+            max-width: 100%;
+            text-align: center;
+        }
+        .logo-container img {
+            max-width: 60px;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+        }
+        #lead-form {
+            padding: 10px;
+        }
+        #lead-form label, #lead-form p {
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        #lead-form input[type="text"], #lead-form input[type="email"], #lead-form input[type="tel"], #lead-form select {
+            width: calc(100% - 10px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: 'Play', sans-serif;
+            font-size: 12px;
+        }
+        #button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        button {
+            width: 48%;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Play', sans-serif;
+        }
+        button.submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        button.submit:hover {
+            background-color: var(--hover-color);
+        }
+        button.close {
+            background-color: #888;
+            color: white;
+            border: none;
+        }
+        button.close:hover {
+            background-color: #666;
+        }
+        .alert {
+            display: none;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <img src="https://i.imgur.com/9mOm7gP.png" alt="Logo" style="width: 100px; display: block; margin: auto;">
-  <form id="userForm">
-    <input type="text" id="firstName" placeholder="First Name" required>
-    <input type="text" id="lastName" placeholder="Last Name" required>
-    <select id="phoneCode" required>
-      <option value="+1">United States (+1)</option>
-      <option value="+91">India (+91)</option>
-      <!-- Add other countries as needed -->
-    </select>
-    <input type="text" id="phoneNumber" placeholder="Phone Number" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <button type="button" onclick="authenticateAndSearch()">Go</button>
-  </form>
-  <div id="membershipOptions" class="hidden">
-    <form id="membershipForm">
-      <!-- Membership options will be populated here -->
-      <input type="date" id="startDate" required>
-      <input type="date" id="endDate" required>
-      <button type="button" onclick="submitMembership()">Submit</button>
-    </form>
-  </div>
-  <div id="spinner" class="spinner"></div>
-</div>
+    <div class="form-overlay" id="formOverlay">
+        <div class="form-container">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/9mOm7gP.png" alt="Physique 57 Logo">
+            </div>
+            <form id="lead-form">
+                <label for="mobileNumber">Please enter your registered mobile number:</label>
+                <input type="tel" id="mobileNumber" name="mobileNumber" required><br>
 
-<script>
-const loginUrl = 'https://api.momence.com/auth/login';
-const email = 'jimmeey@physique57india.com';
-const password = 'Jimmeey@123';
-let sessionCookie = null;
+                <label for="email">Please enter your registered email id:</label>
+                <input type="email" id="email" name="email" required><br>
 
-function authenticateAndSearch() {
-  showSpinner(true);
-  const loginHeaders = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
-  const loginPayload = JSON.stringify({ email, password });
+                <label for="membership">Please select the Membership you would like to freeze:</label>
+                <select id="membership" name="membership" required>
+                    <option value="Limited Edition : 57 Class Pack">Limited Edition : 57 Class Pack</option>
+                    <option value="Studio 1 Month Unlimited Membership">Studio 1 Month Unlimited Membership</option>
+                    <option value="Studio 12 Class Package">Studio 12 Class Package</option>
+                    <option value="Studio 2 Week Unlimited Membership">Studio 2 Week Unlimited Membership</option>
+                    <option value="Studio 3 Month U/L Monthly Installment">Studio 3 Month U/L Monthly Installment</option>
+                    <option value="Studio 3 Month Unlimited Membership">Studio 3 Month Unlimited Membership</option>
+                    <option value="Studio 4 Class Package">Studio 4 Class Package</option>
+                    <option value="Studio 6 Month Unlimited Membership">Studio 6 Month Unlimited Membership</option>
+                    <option value="Studio 8 Class Package">Studio 8 Class Package</option>
+                    <option value="Studio Annual Membership - Monthly Intsallment">Studio Annual Membership - Monthly Intsallment</option>
+                    <option value="Studio Annual Unlimited Membership">Studio Annual Unlimited Membership</option>
+                    <option value="Studio FLEX 4 Class">Studio FLEX 4 Class</option>
+                    <option value="Studio Newcomers 2 Week Unlimited Membership">Studio Newcomers 2 Week Unlimited Membership</option>
+                    <option value="Studio Single class">Studio Single class</option>
+                    <option value="The BURN Pacakge">The BURN Pacakge</option>
+                    <option value="VIP ALL ACCESS - Studio 1 Month Unlimited Membership">VIP ALL ACCESS - Studio 1 Month Unlimited Membership</option>
+                </select><br>
 
-  fetch(loginUrl, {
-    method: 'POST',
-    headers: loginHeaders,
-    body: loginPayload,
-    credentials: 'include'  // Ensure credentials are included
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Authentication failed with status: ' + response.status);
-    }
-    console.log('Response Headers:', response.headers);  // Log response headers
-    return response.json();
-  })
-  .then(data => {
-    console.log('Authentication successful, received data:', data);
-    const setCookieHeader = response.headers.get('Set-Cookie');
-    if (!setCookieHeader) {
-      throw new Error('Set-Cookie header is missing in the response');
-    }
-    sessionCookie = setCookieHeader.split(';')[0];
-    searchCustomer();
-  })
-  .catch(error => {
-    console.error('Error during authentication:', error);
-    showSpinner(false);
-  });
-}
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" required><br>
 
-function searchCustomer() {
-  const phoneNumber = document.getElementById('phoneCode').value + document.getElementById('phoneNumber').value;
-  const searchUrl = `https://api.momence.com/host/13752/search?query=${phoneNumber}&summary=true`;
+                <label for="startDate">Start - Select the Start date for your freeze period:</label>
+                <input type="date" id="startDate" name="startDate" required><br>
 
-  fetch(searchUrl, {
-    method: 'GET',
-    headers: { 'Cookie': sessionCookie },
-    credentials: 'include'  // Ensure credentials are included
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to fetch customer with status: ' + response.status);
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log('Customer search successful, received data:', data);
-    fetchMemberships(data.customerId);
-  })
-  .catch(error => {
-    console.error('Error fetching customer:', error);
-    showSpinner(false);
-  });
-}
+                <label for="endDate">End - Select the End date for your freeze period:</label>
+                <input type="date" id="endDate" name="endDate" required><br>
 
-function fetchMemberships(customerId) {
-  const subscriptionsUrl = `https://readonly-api.momence.com/host/13752/customers/${customerId}/subscriptions?type=active`;
-  const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`;
+                <div id="button-container">
+                    <button type="button" class="close" onclick="closeForm()">Close</button>
+                    <button type="button" class="submit" onclick="onSubmit()">Submit</button>
+                </div>
+            </form>
+            <div id="alert" class="alert"></div>
+        </div>
+    </div>
 
-  Promise.all([
-    fetch(subscriptionsUrl, { headers: { 'Cookie': sessionCookie }, credentials: 'include' }).then(res => {
-      if (!res.ok) {
-        throw new Error('Failed to fetch subscriptions with status: ' + res.status);
-      }
-      return res.json();
-    }),
-    fetch(packsUrl, { headers: { 'Cookie': sessionCookie }, credentials: 'include' }).then(res => {
-      if (!res.ok) {
-        throw new Error('Failed to fetch packs with status: ' + res.status);
-      }
-      return res.json();
-    })
-  ])
-  .then(([subscriptions, packs]) => {
-    console.log('Fetched memberships:', { subscriptions, packs });
-    const memberships = [...subscriptions, ...packs];
-    displayMembershipOptions(memberships);
-    showSpinner(false);
-  })
-  .catch(error => {
-    console.error('Error fetching memberships:', error);
-    showSpinner(false);
-  });
-}
+    <script>
+        function onSubmit() {
+            var form = {
+                mobileNumber: document.getElementById('mobileNumber').value,
+                email: document.getElementById('email').value,
+                membership: document.getElementById('membership').value,
+                fullName: document.getElementById('fullName').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value
+            };
 
-function displayMembershipOptions(memberships) {
-  const container = document.getElementById('membershipOptions');
-  container.innerHTML = '';
-  memberships.forEach(membership => {
-    const option = document.createElement('input');
-    option.type = 'checkbox';
-    option.value = membership.id;
-    option.id = 'membership' + membership.id;
-    container.appendChild(option);
+            // Check if membership is ineligible
+            var ineligibleMemberships = ['Studio 4 Class Package', 'Studio 2 Week Unlimited Membership', 'Studio FLEX 4 Class', 'Studio Single class', 'Studio Newcomers 2 Week Unlimited Membership'];
+            if (ineligibleMemberships.includes(form.membership)) {
+                showAlert('Error! This package is not eligible for freezing. Please contact the branch for more information.', 'error');
+                return;
+            }
 
-    const label = document.createElement('label');
-    label.htmlFor = 'membership' + membership.id;
-    label.textContent = membership.name;
-    container.appendChild(label);
-  });
-  container.classList.remove('hidden');
-}
+            // Check if duration is more than 30 days
+            var startDate = new Date(form.startDate);
+            var endDate = new Date(form.endDate);
+            var maxDuration = 30; // Maximum freeze duration in days
+            if ((endDate - startDate) / (1000 * 60 * 60 * 24) > maxDuration) {
+                showAlert('Error! Maximum freeze duration is 30 days.', 'error');
+                return;
+            }
 
-function submitMembership() {
-  const selectedMembershipId = document.querySelector('input[type="checkbox"]:checked').value;
-  const startDate = document.getElementById('startDate').value;
-  const endDate = document.getElementById('endDate').value;
-  const freezeUrl = `https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-freeze`;
-  const unfreezeUrl = `https://api.momence.com/host/13752/bought-memberships/${selectedMembershipId}/schedule-unfreeze`;
+            // Record submission to Google Sheets
+            recordSubmission(form);
+        }
 
-  Promise.all([
-    fetch(freezeUrl, {
-      method: 'POST',
-      headers: { 'Cookie': sessionCookie },
-      body: JSON.stringify({ startDate, endDate }),
-      credentials: 'include'  // Ensure credentials are included
-    }),
-    fetch(unfreezeUrl, {
-      method: 'POST',
-      headers: { 'Cookie': sessionCookie },
-      body: JSON.stringify({ startDate, endDate }),
-      credentials: 'include'  // Ensure credentials are included
-    })
-  ])
-  .then(() => {
-    alert('Membership updated successfully!');
-    showSpinner(false);
-  })
-  .catch(error => {
-    console.error('Error updating membership:', error);
-    showSpinner(false);
-  });
-}
+        function closeForm() {
+            document.getElementById('formOverlay').style.display = 'none';
+            document.getElementById('lead-form').reset();
+        }
 
-function showSpinner(show) {
-  const spinner = document.getElementById('spinner');
-  spinner.style.display = show ? 'block' : 'none';
-}
-</script>
+        function showAlert(message, type) {
+            var alertBox = document.getElementById('alert');
+            alertBox.innerText = message;
+            alertBox.className = 'alert ' + type;
+            alertBox.style.display = 'block';
+            setTimeout(function() {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        function recordSubmission(form) {
+            const scriptURL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // Replace with your Google Apps Script URL
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(form),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    showAlert('Form submitted successfully!', 'success');
+                    document.getElementById('lead-form').reset();
+                } else {
+                    showAlert('Error submitting form. Please try again.', 'error');
+                }
+            })
+            .catch(error => {
+                showAlert('Error submitting form. Please try again.', 'error');
+            });
+        }
+    </script>
 </body>
 </html>
