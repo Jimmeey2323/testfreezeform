@@ -233,10 +233,10 @@
                 });
 
                 if (response.ok) {
-                    const cookie = response.headers.get('set-cookie');
-                    return cookie ? cookie.split(';')[0] : null;
+                    const cookieHeader = response.headers.get('set-cookie');
+                    return cookieHeader ? cookieHeader.split(';')[0] : null;
                 } else {
-                    throw new Error('Authentication failed');
+                    throw new Error('Failed to authenticate');
                 }
             } catch (error) {
                 console.error('Error during authentication:', error);
