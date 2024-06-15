@@ -204,28 +204,28 @@
         }
 
         function recordSubmission(form) {
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbwdJEKria_wnZe4JWKzfzf5lpKXdFcoCERPiAS5XHDY80RgAlxLHqy-getRT6ysR4b-/exec'; // Replace with your Google Apps Script URL
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify(form),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                    mode: 'cors' // Add this line
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.result === 'success') {
-                    showAlert('Form submitted successfully!', 'success');
-                    document.getElementById('lead-form').reset();
-                } else {
-                    showAlert('Error submitting form. Please try again.', 'error');
-                }
-            })
-            .catch(error => {
-                showAlert('Error submitting form. Please try again.', 'error');
-            });
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwdJEKria_wnZe4JWKzfzf5lpKXdFcoCERPiAS5XHDY80RgAlxLHqy-getRT6ysR4b-/exec'; // Replace with your Google Apps Script URL
+    fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(form),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        mode: 'cors' // Comma was added here
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.result === 'success') {
+            showAlert('Form submitted successfully!', 'success');
+            document.getElementById('lead-form').reset();
+        } else {
+            showAlert('Error submitting form. Please try again.', 'error');
         }
+    })
+    .catch(error => {
+        showAlert('Error submitting form. Please try again.', 'error');
+    });
+}
     </script>
 </body>
 </html>
