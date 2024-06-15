@@ -59,17 +59,23 @@ function authenticateAndSearch() {
   fetch(loginUrl, {
     method: 'POST',
     headers: loginHeaders,
-    body: loginPayload
+    body: loginPayload,
+    credentials: 'include'  // Ensure credentials are included
   })
   .then(response => {
     if (!response.ok) {
       throw new Error('Authentication failed with status: ' + response.status);
     }
+    console.log('Response Headers:', response.headers);  // Log response headers
     return response.json();
   })
   .then(data => {
     console.log('Authentication successful, received data:', data);
-    sessionCookie = data.headers['Set-Cookie'].split(';')[0];
+    const setCookieHeader = response.headers.get('Set-Cookie');
+    if (!setCookieHeader) {
+      throw new Error('Set-Cookie header is missing in the response');
+    }
+    sessionCookie = setCookieHeader.split(';')[0];
     searchCustomer();
   })
   .catch(error => {
@@ -84,7 +90,8 @@ function searchCustomer() {
 
   fetch(searchUrl, {
     method: 'GET',
-    headers: { 'Cookie': sessionCookie }
+    headers: { 'Cookie': sessionCookie },
+    credentials: 'include'  // Ensure credentials are included
   })
   .then(response => {
     if (!response.ok) {
@@ -107,13 +114,13 @@ function fetchMemberships(customerId) {
   const packsUrl = `https://readonly-api.momence.com/host/13752/customers/${customerId}/packs?type=active`;
 
   Promise.all([
-    fetch(subscriptionsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => {
+    fetch(subscriptionsUrl, { headers: { 'Cookie': sessionCookie }, credentials: 'include' }).then(res => {
       if (!res.ok) {
         throw new Error('Failed to fetch subscriptions with status: ' + res.status);
       }
       return res.json();
     }),
-    fetch(packsUrl, { headers: { 'Cookie': sessionCookie } }).then(res => {
+    fetch(packsUrl, { headers: { 'Cookie': sessionCookie }, credentials: 'include' }).then(res => {
       if (!res.ok) {
         throw new Error('Failed to fetch packs with status: ' + res.status);
       }
@@ -161,12 +168,14 @@ function submitMembership() {
     fetch(freezeUrl, {
       method: 'POST',
       headers: { 'Cookie': sessionCookie },
-      body: JSON.stringify({ startDate, endDate })
+      body: JSON.stringify({ startDate, endDate }),
+      credentials: 'include'  // Ensure credentials are included
     }),
     fetch(unfreezeUrl, {
       method: 'POST',
       headers: { 'Cookie': sessionCookie },
-      body: JSON.stringify({ startDate, endDate })
+      body: JSON.stringify({ startDate, endDate }),
+      credentials: 'include'  // Ensure credentials are included
     })
   ])
   .then(() => {
